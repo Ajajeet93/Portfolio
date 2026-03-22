@@ -25,46 +25,42 @@ export function TerminalContact({ contact, resumeHref }) {
       },
       contact: {
         entries: [
-          { label: "Email", value: contact.email, href: `mailto:${contact.email}` },
-          { label: "Phone", value: contact.phone, href: `tel:${contact.phone}` },
-          { label: "LinkedIn", value: contact.linkedin, href: contact.linkedin },
-          { label: "GitHub", value: contact.github, href: contact.github },
+          { label: "Email", href: `mailto:${contact.email}`, actionLabel: "Send Email" },
+          { label: "Phone", href: `tel:${contact.phone}`, actionLabel: "Call Phone" },
+          { label: "LinkedIn", href: contact.linkedin, actionLabel: "Open LinkedIn" },
+          { label: "GitHub", href: contact.github, actionLabel: "Open GitHub" },
         ],
       },
       email: {
-        entries: [{ label: "Email", value: contact.email, href: `mailto:${contact.email}` }],
+        entries: [{ label: "Email", href: `mailto:${contact.email}`, actionLabel: "Send Email" }],
       },
       phone: {
-        entries: [{ label: "Phone", value: contact.phone, href: `tel:${contact.phone}` }],
+        entries: [{ label: "Phone", href: `tel:${contact.phone}`, actionLabel: "Call Phone" }],
       },
       resume: {
         link: { label: "Open Resume", href: resumeHref },
       },
       github: {
-        entries: [{ label: "GitHub", value: contact.github, href: contact.github }],
-        link: { label: "Open GitHub", href: contact.github },
+        entries: [{ label: "GitHub", href: contact.github, actionLabel: "Open GitHub" }],
       },
       linkedin: {
-        entries: [{ label: "LinkedIn", value: contact.linkedin, href: contact.linkedin }],
-        link: { label: "Open LinkedIn", href: contact.linkedin },
+        entries: [{ label: "LinkedIn", href: contact.linkedin, actionLabel: "Open LinkedIn" }],
       },
       leetcode: {
-        entries: [{ label: "LeetCode", value: contact.leetcode, href: contact.leetcode }],
-        link: { label: "Open LeetCode", href: contact.leetcode },
+        entries: [{ label: "LeetCode", href: contact.leetcode, actionLabel: "Open LeetCode" }],
       },
       gfg: {
-        entries: [{ label: "GeeksforGeeks", value: contact.gfg, href: contact.gfg }],
-        link: { label: "Open GeeksforGeeks", href: contact.gfg },
+        entries: [{ label: "GeeksforGeeks", href: contact.gfg, actionLabel: "Open GeeksforGeeks" }],
       },
       "coding profiles": {
         entries: [
-          { label: "GitHub", value: contact.github, href: contact.github },
-          { label: "LeetCode", value: contact.leetcode, href: contact.leetcode },
-          { label: "GeeksforGeeks", value: contact.gfg, href: contact.gfg },
-          { label: "Code360", value: contact.code360, href: contact.code360 },
-          { label: "Codolio", value: contact.codolio, href: contact.codolio },
-          { label: "HackerRank", value: contact.hackerrank, href: contact.hackerrank },
-          { label: "CodeChef", value: contact.codechef, href: contact.codechef },
+          { label: "GitHub", href: contact.github, actionLabel: "Open GitHub" },
+          { label: "LeetCode", href: contact.leetcode, actionLabel: "Open LeetCode" },
+          { label: "GeeksforGeeks", href: contact.gfg, actionLabel: "Open GeeksforGeeks" },
+          { label: "Code360", href: contact.code360, actionLabel: "Open Code360" },
+          { label: "Codolio", href: contact.codolio, actionLabel: "Open Codolio" },
+          { label: "HackerRank", href: contact.hackerrank, actionLabel: "Open HackerRank" },
+          { label: "CodeChef", href: contact.codechef, actionLabel: "Open CodeChef" },
         ],
       },
     }),
@@ -91,14 +87,36 @@ export function TerminalContact({ contact, resumeHref }) {
     container.scrollTop = container.scrollHeight;
   }, [history]);
 
-  const handleWheel = (event) => {
+  const handleOutputWheel = (event) => {
     const container = outputRef.current;
 
-    if (!container) {
+    if (!container || event.deltaY === 0) {
+      return;
+    }
+
+    const isScrollable = container.scrollHeight > container.clientHeight;
+
+    if (!isScrollable) {
+      return;
+    }
+
+    const isAtTop = container.scrollTop <= 0;
+    const isAtBottom =
+      container.scrollTop + container.clientHeight >= container.scrollHeight - 1;
+    const shouldConsume =
+      (event.deltaY > 0 && !isAtBottom) || (event.deltaY < 0 && !isAtTop);
+
+    if (!shouldConsume) {
       return;
     }
 
     event.preventDefault();
+    event.stopPropagation();
+
+    if (typeof event.nativeEvent.stopImmediatePropagation === "function") {
+      event.nativeEvent.stopImmediatePropagation();
+    }
+
     container.scrollTop += event.deltaY;
   };
 
@@ -131,7 +149,7 @@ export function TerminalContact({ contact, resumeHref }) {
   };
 
   return (
-    <div className="terminal-shell mt-12" onWheelCapture={handleWheel}>
+    <div className="terminal-shell mt-12">
       <div className="terminal-topbar">
         <span className="terminal-dot bg-[#7A0C0C]" />
         <span className="terminal-dot bg-[#d97706]" />
@@ -140,7 +158,7 @@ export function TerminalContact({ contact, resumeHref }) {
       </div>
 
       <div className="terminal-body">
-        <div ref={outputRef} className="terminal-output" onWheel={handleWheel}>
+        <div ref={outputRef} className="terminal-output" onWheelCapture={handleOutputWheel}>
           <div className="terminal-block terminal-built-in">
             <p className="terminal-command">$ help</p>
             {commands.help.lines.map((line) => (
@@ -170,21 +188,23 @@ export function TerminalContact({ contact, resumeHref }) {
                   {line}
                 </p>
               ))}
-              {entry.output.entries
-                ? entry.output.entries.map((entryItem) => (
-                    <p key={`${entryItem.label}-${entryItem.value}`} className="terminal-line">
-                      {entryItem.label}:{" "}
+              {entry.output.entries ? (
+                <div className="terminal-entry-list">
+                  {entry.output.entries.map((entryItem) => (
+                    <div key={`${entryItem.label}-${entryItem.href}`} className="terminal-entry-row">
+                      <p className="terminal-line terminal-entry-label">{entryItem.label}</p>
                       <a
                         href={entryItem.href}
                         target="_blank"
                         rel="noreferrer"
-                        className="terminal-inline-link"
+                        className="terminal-action-button"
                       >
-                        {entryItem.value}
+                        {entryItem.actionLabel ?? `Open ${entryItem.label}`}
                       </a>
-                    </p>
-                  ))
-                : null}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
               {entry.output.commandList ? (
                 <div className="terminal-command-list">
                   {entry.output.commandList.map((command) => (
@@ -204,7 +224,7 @@ export function TerminalContact({ contact, resumeHref }) {
                   href={entry.output.link.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="terminal-link"
+                  className="terminal-action-button terminal-link"
                 >
                   {entry.output.link.label}
                 </a>

@@ -127,10 +127,22 @@ export const portfolio = {
     },
   ],
   highlights: [
-    "IBM: Developing Back-End Applications with Node.js and Express",
-    "Meta: React (Basic & Advanced)",
-    "Meta: Programming with JavaScript",
-    "CipherSchools: Data Structures and Algorithms Using C++",
+    {
+      label: "IBM: Developing Back-End Applications with Node.js and Express",
+      href: "https://www.coursera.org/account/accomplishments/verify/LYTRU5VPMS3Z",
+    },
+    {
+      label: "Meta: React (Basic & Advanced)",
+      href: "https://www.coursera.org/account/accomplishments/verify/C4WUY59PG1WF",
+    },
+    {
+      label: "Meta: Programming with JavaScript",
+      href: "https://www.coursera.org/account/accomplishments/verify/3T6M1Z5HIQN8",
+    },
+    {
+      label: "CipherSchools: Data Structures and Algorithms Using C++",
+      href: "https://drive.google.com/file/d/1JC0rFu_B1KFEIWusxmALmZHoEoug98Be/view",
+    },
   ],
   experience: [
     {

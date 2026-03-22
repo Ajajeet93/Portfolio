@@ -7,6 +7,7 @@ export function useLenis() {
       duration: 1,
       smoothWheel: true,
       touchMultiplier: 1.2,
+      allowNestedScroll: true,
     });
 
     let frame = 0;
